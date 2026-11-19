@@ -33,7 +33,9 @@ function App() {
             </Grid>
 
             {/* Selector */}
-            <SelectorUI cityInput={ciudad} onCityChange={setCiudad} />
+            <Grid size={{ xs: 12, md: 3 }}>
+                <SelectorUI cityInput={ciudad} onCityChange={setCiudad} />
+            </Grid>
 
             {/* Indicadores */}
             <Grid container spacing={2} size={{ xs: 12, md: 9 }}>
