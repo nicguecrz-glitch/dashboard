@@ -1,9 +1,11 @@
 import { FormControl, InputLabel, MenuItem, Select } from '@mui/material';
-import { useState } from 'react';
 
-export default function SelectorUI() {
-    const [cityInput, setCityInput] = useState('');
+interface SelectorUIProps {
+    cityInput: string;
+    onCityChange: (city: string) => void;
+}
 
+export default function SelectorUI({ cityInput, onCityChange }: SelectorUIProps) {
     return (
         <FormControl fullWidth>
             <InputLabel id="city-label">Ciudad</InputLabel>
@@ -11,7 +13,7 @@ export default function SelectorUI() {
                 labelId="city-label"
                 label="Ciudad"
                 value={cityInput}
-                onChange={(event) => setCityInput(event.target.value)}
+                onChange={(event) => onCityChange(event.target.value)}
             >
                 <MenuItem value="Guayaquil">Guayaquil</MenuItem>
                 <MenuItem value="Quito">Quito</MenuItem>
