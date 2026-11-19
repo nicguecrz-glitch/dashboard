@@ -12,8 +12,8 @@ import useFetchData from './hooks/useFetchData';
 
 function App() {
 
-    const [ciudad, setCiudad] = useState('Guayaquil');
-    const { data: clima, loading, error } = useFetchData(ciudad);
+    const [ciudad, setCiudad] = useState('');
+    const { data: clima, loading, error } = useFetchData(ciudad || 'Guayaquil');
 
     return (
         <Grid container spacing={5} sx={{ justifyContent: 'center', alignItems: 'center' }}>
