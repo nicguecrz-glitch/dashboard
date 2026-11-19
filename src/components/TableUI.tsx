@@ -1,46 +1,48 @@
-import { Box, Typography } from '@mui/material';
-import type { GridColDef } from '@mui/x-data-grid';
-import { DataGrid } from '@mui/x-data-grid';
-import type { OpenMeteoResponse } from '../types/DashboardTypes';
+import Box from '@mui/material/Box';
+import { DataGrid, type GridColDef } from '@mui/x-data-grid';
 
 interface TableUIProps {
-    clima: OpenMeteoResponse;
+    labels: string[];
+    values1: number[];
+    values2: number[];
+    header1: string;
+    header2: string;
 }
 
-export default function TableUI({ clima }: TableUIProps) {
-    const { hourly, hourly_units } = clima;
-
-    const rows = hourly.time.map((fechaHora, index) => ({
-        id: fechaHora,
-        hora: fechaHora.slice(11, 16),
-        temperatura: hourly.temperature_2m[index],
-        viento: hourly.wind_speed_10m[index],
+function combineArrays(arrLabels: Array<string>, arrValues1: Array<number>, arrValues2: Array<number>) {
+    return arrLabels.map((label, index) => ({
+        id: index,
+        label: label,
+        value1: arrValues1[index],
+        value2: arrValues2[index],
     }));
+}
+
+export default function TableUI({ labels, values1, values2, header1, header2 }: TableUIProps) {
 
     const columns: GridColDef[] = [
-        { field: 'hora', headerName: 'Hora', width: 80 },
-        {
-            field: 'temperatura',
-            headerName: `Temperatura (${hourly_units.temperature_2m})`,
-            type: 'number',
-            flex: 1,
-            minWidth: 150,
-        },
-        {
-            field: 'viento',
-            headerName: `Viento (${hourly_units.wind_speed_10m})`,
-            type: 'number',
-            flex: 1,
-            minWidth: 120,
-        },
+        { field: 'label', headerName: 'Hora', width: 160 },
+        { field: 'value1', headerName: header1, width: 160 },
+        { field: 'value2', headerName: header2, width: 160 },
     ];
 
+    const rows = combineArrays(labels, values1, values2);
+
     return (
-        <>
-            <Typography variant="h6">Pronóstico por hora</Typography>
-            <Box sx={{ height: 320, width: '100%' }}>
-                <DataGrid rows={rows} columns={columns} hideFooter />
-            </Box>
-        </>
+        <Box sx={{ height: 350, width: '100%' }}>
+            <DataGrid
+                rows={rows}
+                columns={columns}
+                initialState={{
+                    pagination: {
+                        paginationModel: {
+                            pageSize: 5,
+                        },
+                    },
+                }}
+                pageSizeOptions={[5]}
+                disableRowSelectionOnClick
+            />
+        </Box>
     );
 }
