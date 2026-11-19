@@ -7,17 +7,20 @@ const COORDENADAS: Record<string, { latitude: number; longitude: number }> = {
     Cuenca: { latitude: -2.9001, longitude: -79.0059 },
 };
 
+interface ResultadoClima {
+    ciudad: string;
+    data: OpenMeteoResponse | null;
+    error: string | null;
+}
+
 export default function useFetchData(ciudad: string) {
-    const [resultado, setResultado] = useState<{
-        ciudad: string;
-        clima: OpenMeteoResponse;
-    } | null>(null);
+    const [resultado, setResultado] = useState<ResultadoClima | null>(null);
+    const coordenadas = COORDENADAS[ciudad];
 
     useEffect(() => {
-        const coordenadas = COORDENADAS[ciudad];
         if (!coordenadas) return;
 
-        const API_URL =
+        const apiUrl =
             `https://api.open-meteo.com/v1/forecast?latitude=${coordenadas.latitude}&longitude=${coordenadas.longitude}` +
             '&current=temperature_2m,relative_humidity_2m,apparent_temperature,wind_speed_10m' +
             '&hourly=temperature_2m,wind_speed_10m' +
@@ -28,25 +31,40 @@ export default function useFetchData(ciudad: string) {
 
         async function obtenerDatos() {
             try {
-                const respuesta = await fetch(API_URL, { signal: controller.signal });
+                const respuesta = await fetch(apiUrl, { signal: controller.signal });
+
                 if (!respuesta.ok) {
                     throw new Error(`Open-Meteo respondió con ${respuesta.status}`);
                 }
 
-                const clima: OpenMeteoResponse = await respuesta.json();
+                const data: OpenMeteoResponse = await respuesta.json();
+
                 if (!controller.signal.aborted) {
-                    setResultado({ ciudad, clima });
+                    setResultado({ ciudad, data, error: null });
                 }
             } catch (error) {
-                if (!controller.signal.aborted) {
-                    console.error('No se pudo consultar el clima', error);
-                }
+                if (controller.signal.aborted) return;
+
+                console.error('No se pudo consultar el clima', error);
+                setResultado({
+                    ciudad,
+                    data: null,
+                    error: `No se pudo consultar el clima de ${ciudad}.`,
+                });
             }
         }
 
         void obtenerDatos();
         return () => controller.abort();
-    }, [ciudad]);
+    }, [ciudad, coordenadas]);
 
-    return resultado?.ciudad === ciudad ? resultado.clima : null;
+    const resultadoActual = resultado?.ciudad === ciudad ? resultado : null;
+
+    return {
+        data: resultadoActual?.data ?? null,
+        loading: Boolean(coordenadas) && resultadoActual === null,
+        error: coordenadas
+            ? resultadoActual?.error ?? null
+            : `La ciudad ${ciudad} no está disponible.`,
+    };
 }

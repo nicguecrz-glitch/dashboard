@@ -1,4 +1,4 @@
-import { Grid } from '@mui/material';
+import { Alert, CircularProgress, Grid } from '@mui/material';
 import { useState } from 'react';
 import './App.css';
 import AlertUI from './components/AlertUI';
@@ -9,10 +9,11 @@ import SelectorUI from './components/SelectorUI';
 import TableUI from './components/TableUI';
 import useFetchData from './hooks/useFetchData';
 
+
 function App() {
 
     const [ciudad, setCiudad] = useState('Guayaquil');
-    const clima = useFetchData(ciudad);
+    const { data: clima, loading, error } = useFetchData(ciudad);
 
     return (
         <Grid container spacing={5} sx={{ justifyContent: 'center', alignItems: 'center' }}>
@@ -36,6 +37,8 @@ function App() {
 
             {/* Indicadores */}
             <Grid container spacing={2} size={{ xs: 12, md: 9 }}>
+                {loading && <CircularProgress aria-label="Cargando datos del clima" />}
+                {error && <Alert severity="error">{error}</Alert>} 
                 {clima && (
                     <>
                         <Grid size={{ xs: 6, md: 3 }}>
