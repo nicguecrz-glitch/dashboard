@@ -1,4 +1,6 @@
-import { Alert, CircularProgress, Grid } from '@mui/material';
+import { Grid } from '@mui/material';
+import Alert from '@mui/material/Alert';
+import CircularProgress from '@mui/material/CircularProgress';
 import { useState } from 'react';
 import './App.css';
 import AlertUI from './components/AlertUI';
@@ -9,16 +11,16 @@ import SelectorUI from './components/SelectorUI';
 import TableUI from './components/TableUI';
 import useFetchData from './hooks/useFetchData';
 
-
 function App() {
 
-    const [ciudad, setCiudad] = useState('');
-    const { data: clima, loading, error } = useFetchData(ciudad || 'Guayaquil');
+    const [selectedOption, setSelectedOption] = useState<string | null>(null);
+
+    const { data, loading, error } = useFetchData(selectedOption);
 
     return (
         <Grid container spacing={5} sx={{ justifyContent: 'center', alignItems: 'center' }}>
 
-                {/* Encabezado */}
+            {/* Encabezado */}
             <Grid size={{ xs: 12, md: 12 }}>
                 <HeaderUI />
             </Grid>
@@ -26,62 +28,72 @@ function App() {
             {/* Alertas */}
             <Grid size={{ xs: 12, md: 12 }}
                 container sx={{ justifyContent: 'flex-end', alignItems: 'center' }}>
-
                 <AlertUI description="No se prevén lluvias" />
-                <AlertUI description="Índice UV alto" severity="warning" variant="filled" />
-
             </Grid>
 
             {/* Selector */}
             <Grid size={{ xs: 12, md: 3 }}>
-                <SelectorUI cityInput={ciudad} onCityChange={setCiudad} />
+                <SelectorUI onOptionSelect={setSelectedOption} />
             </Grid>
 
             {/* Indicadores */}
-            <Grid container spacing={2} size={{ xs: 12, md: 9 }}>
-                {loading && <CircularProgress aria-label="Cargando datos del clima" />}
-                {error && <Alert severity="error">{error}</Alert>} 
-                {clima && (
+            <Grid container size={{ xs: 12, md: 9 }}>
+
+                {loading && <CircularProgress />}
+                {error && <Alert severity="error">{error}</Alert>}
+
+                {data && (
                     <>
-                        <Grid size={{ xs: 6, md: 3 }}>
+                        <Grid size={{ xs: 12, md: 3 }}>
                             <IndicatorUI
-                                title="Temperatura (2 m)"
-                                description={`${clima.current.temperature_2m} ${clima.current_units.temperature_2m}`}
-                            />
+                                title='Temperatura (2m)'
+                                description={`${data.current.temperature_2m} ${data.current_units.temperature_2m}`} />
                         </Grid>
-                        <Grid size={{ xs: 6, md: 3 }}>
+
+                        <Grid size={{ xs: 12, md: 3 }}>
                             <IndicatorUI
-                                title="Temperatura aparente"
-                                description={`${clima.current.apparent_temperature} ${clima.current_units.apparent_temperature}`}
-                            />
+                                title='Temperatura aparente'
+                                description={`${data.current.apparent_temperature} ${data.current_units.apparent_temperature}`} />
                         </Grid>
-                        <Grid size={{ xs: 6, md: 3 }}>
+
+                        <Grid size={{ xs: 12, md: 3 }}>
                             <IndicatorUI
-                                title="Velocidad del viento"
-                                description={`${clima.current.wind_speed_10m} ${clima.current_units.wind_speed_10m}`}
-                            />
+                                title='Velocidad del viento'
+                                description={`${data.current.wind_speed_10m} ${data.current_units.wind_speed_10m}`} />
                         </Grid>
-                        <Grid size={{ xs: 6, md: 3 }}>
+
+                        <Grid size={{ xs: 12, md: 3 }}>
                             <IndicatorUI
-                                title="Humedad relativa"
-                                description={`${clima.current.relative_humidity_2m} ${clima.current_units.relative_humidity_2m}`}
-                            />
+                                title='Humedad relativa'
+                                description={`${data.current.relative_humidity_2m} ${data.current_units.relative_humidity_2m}`} />
                         </Grid>
                     </>
                 )}
+
             </Grid>
 
             {/* Gráfico */}
-            <Grid size={{ xs: 12, md: 6 }}>
-                {clima?.hourly && <ChartUI clima={clima} />}
+            <Grid size={{ xs: 12, md: 6 }} sx={{ display: { xs: 'none', md: 'block' } }}>
+                {data && (
+                    <ChartUI
+                        title='Temperatura y viento por hora'
+                        labels={data.hourly.time.map((tiempo) => tiempo.slice(11))}
+                        values1={data.hourly.temperature_2m}
+                        values2={data.hourly.wind_speed_10m}
+                        label1={`Temperatura (${data.hourly_units.temperature_2m})`}
+                        label2={`Viento (${data.hourly_units.wind_speed_10m})`} />
+                )}
             </Grid>
 
             {/* Tabla */}
-            <Grid size={{ xs: 12, md: 6 }}>
-                {clima?.hourly && (
-                    clima.hourly_units
-                        ? <TableUI clima={clima} />
-                        : <p>Faltan las unidades del pronóstico por hora.</p>
+            <Grid size={{ xs: 12, md: 6 }} sx={{ display: { xs: 'none', md: 'block' } }}>
+                {data && (
+                    <TableUI
+                        labels={data.hourly.time.map((tiempo) => tiempo.slice(11))}
+                        values1={data.hourly.temperature_2m}
+                        values2={data.hourly.wind_speed_10m}
+                        header1={`Temperatura (${data.hourly_units.temperature_2m})`}
+                        header2={`Viento (${data.hourly_units.wind_speed_10m})`} />
                 )}
             </Grid>
 
