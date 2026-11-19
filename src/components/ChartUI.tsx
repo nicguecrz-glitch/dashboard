@@ -1,38 +1,26 @@
-import { Typography } from '@mui/material';
+import Typography from '@mui/material/Typography';
 import { LineChart } from '@mui/x-charts/LineChart';
-import type { OpenMeteoResponse } from '../types/DashboardTypes';
 
 interface ChartUIProps {
-    clima: OpenMeteoResponse;
+    title: string;
+    labels: string[];
+    values1: number[];
+    values2: number[];
+    label1: string;
+    label2: string;
 }
 
-export default function ChartUI({ clima }: ChartUIProps) {
-    const { hourly, hourly_units } = clima;
-    const horas = hourly.time.map((fechaHora) => fechaHora.slice(11, 16));
-
+export default function ChartUI({ title, labels, values1, values2, label1, label2 }: ChartUIProps) {
     return (
         <>
-            <Typography variant="h6">Temperatura y viento por hora</Typography>
-
+            <Typography variant="h5" component="div">{title}</Typography>
             <LineChart
-                height={320}
-                xAxis={[{ data: horas, scaleType: 'point' }]}
-                yAxis={[
-                    { id: 'temperatura' },
-                    { id: 'viento', position: 'right' },
-                ]}
+                height={300}
                 series={[
-                    {
-                        data: hourly.temperature_2m,
-                        label: `Temperatura (${hourly_units.temperature_2m})`,
-                        yAxisId: 'temperatura',
-                    },
-                    {
-                        data: hourly.wind_speed_10m,
-                        label: `Viento (${hourly_units.wind_speed_10m})`,
-                        yAxisId: 'viento',
-                    },
+                    { data: values1, label: label1 },
+                    { data: values2, label: label2 },
                 ]}
+                xAxis={[{ scaleType: 'point', data: labels }]}
             />
         </>
     );
