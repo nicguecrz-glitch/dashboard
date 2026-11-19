@@ -1,16 +1,22 @@
-import { Card, CardContent, Typography } from '@mui/material';
+import Card from '@mui/material/Card';
+import CardContent from '@mui/material/CardContent';
+import Typography from '@mui/material/Typography';
 
 interface IndicatorUIProps {
-    title: string;
-    description: string;
+    title?: string;
+    description?: string;
 }
 
-export default function IndicatorUI({ title, description }: IndicatorUIProps) {
+export default function IndicatorUI(props: IndicatorUIProps) {
     return (
-        <Card variant="outlined">
-            <CardContent>
-                <Typography variant="body2">{title}</Typography>
-                <Typography variant="h6">{description}</Typography>
+        <Card>
+            <CardContent sx={{ height: '100%' }}>
+                <Typography variant="h5" component="div">
+                    {props.description}
+                </Typography>
+                <Typography variant="body2" component="p" color="text.secondary">
+                    {props.title}
+                </Typography>
             </CardContent>
         </Card>
     );
